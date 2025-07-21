@@ -51,8 +51,6 @@ def rename_scene(stash: StashInterface, config: Config, args):
         old_path = stash_file.get_old_file_path()
         new_path = stash_file.get_new_file_path()
 
-        log.info(f"Renaming file from {old_path} to {new_path}")
-
         stash_file.rename_file()
 
 def rename_all_scenes(stash: StashInterface, config: Config):

@@ -28,6 +28,7 @@ def key_getter(key):
 
 FILE_VARIABLES = {
     "audio_codec": key_getter("audio_codec"),
+    "ext": lambda _, file: file.get("basename", "").split(".")[-1],
     "format": key_getter("format"),
     "height": key_getter("height"),
     "video_codec": key_getter("video_codec"),
