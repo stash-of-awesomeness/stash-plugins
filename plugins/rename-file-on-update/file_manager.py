@@ -54,7 +54,14 @@ def find_variables(format_template) -> list[str]:
 
 
 def clean_optional_from_format(formatted_string: str) -> str:
-    return re.sub(r"\{.*\$\w+\$.*\}", "", formatted_string)
+    variables = find_variables(formatted_string)
+
+    for variable in variables:
+        formatted_string = re.sub(rf"\{{.*\${variable}\$.*\}}", "", formatted_string)
+
+    formatted_string = formatted_string.replace(r"{", "").replace(r"}", "")
+
+    return formatted_string
 
 
 def apply_format(format_template, stash, scene_data, file_data):
