@@ -34,12 +34,12 @@ files {
 """
 
 def rename_scene(stash: StashInterface, config: Config, args):
-    log.info(f"Checking scene with args: {args}")
+    log.debug(f"Checking scene with args: {args}")
 
     scene_id = args["hookContext"]["id"]
     scene = stash.find_scene(scene_id, fragment=SCENE_FRAGMENT)
 
-    log.info(f"Found scene: {scene}")
+    log.debug(f"Found scene: {scene}")
 
     if not config.rename_unorganized and not scene["organized"]:
         log.info("Scene is not marked as organized, ignoring scene.")
@@ -47,10 +47,6 @@ def rename_scene(stash: StashInterface, config: Config, args):
 
     for file in scene["files"]:
         stash_file = StashFile(stash, config, scene, file)
-
-        old_path = stash_file.get_old_file_path()
-        new_path = stash_file.get_new_file_path()
-
         stash_file.rename_file()
 
 def rename_all_scenes(stash: StashInterface, config: Config):

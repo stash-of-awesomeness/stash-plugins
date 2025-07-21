@@ -135,7 +135,7 @@ class StashFile:
             log.info("File paths are the same, no renaming needed.")
             return
 
-        log.info(f"Checking if a file exists at {new_path}")
+        log.debug(f"Checking if a file exists at {new_path}")
 
         if new_path.exists():
             log.warning(f"File already exists at {new_path}, skipping renaming.")
