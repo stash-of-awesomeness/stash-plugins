@@ -13,7 +13,7 @@ def get_parent_studio_chain(stash, scene):
 
         parent_chain.append(current_studio.get("name"))
 
-    return "/".join(parent_chain)
+    return "/".join(reversed(parent_chain))
 
 def key_getter(key):
     return lambda _, scene: scene.get(key, "")
