@@ -7,7 +7,7 @@ from file_manager import StashFile
 def rename_scene(stash: StashInterface, config: Config, args):
     log.info(f"Checking scene with args: {args}")
 
-    scene_id = args["hookContext"]["scene_id"]
+    scene_id = args["hookContext"]["id"]
     scene = stash.get_scene(scene_id)
 
     if not config.rename_unorganized and not scene["organized"]:

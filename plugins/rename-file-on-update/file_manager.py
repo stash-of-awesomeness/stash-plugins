@@ -1,6 +1,14 @@
 from operator import itemgetter
 from stashapi import log
 
+FILE_VARIABLES = {
+    "audio_codec": itemgetter("audio_codec"),
+    "format": itemgetter("format"),
+    "height": itemgetter("height"),
+    "video_codec": itemgetter("video_codec"),
+    "width": itemgetter("width"),
+}
+
 SCENE_VARIABLES = {
     "scene_id": itemgetter("id"),
     "title": itemgetter("title"),
@@ -22,7 +30,13 @@ def apply_format(format_template, scene_data, file_data):
     variables = find_variables(format_template)
 
     for variable in variables:
-        value = SCENE_VARIABLES[variable](scene_data)
+        if variable in FILE_VARIABLES:
+            value = FILE_VARIABLES[variable](file_data)
+        elif variable in SCENE_VARIABLES:
+            value = SCENE_VARIABLES[variable](scene_data)
+        else:
+            value = "<unknown>"
+
         format_template = format_template.replace(f"${variable}$", str(value))
 
     return format_template
@@ -37,8 +51,15 @@ class StashFile:
         return f'{self.file_data["path"]}{self.file_data["basename"]}'
 
     def get_new_file_path(self):
-        directory_path = apply_format(self.config["default_directory_path_format"], self.scene_data, self.file_data)
-        file_name = apply_format(self.config["default_file_name_format"], self.scene_data, self.file_data)
+        if self.config.default_directory_path_format:
+            directory_path = apply_format(self.config.default_directory_path_format, self.scene_data, self.file_data)
+        else:
+            directory_path = self.file_data["path"]
+
+        if self.config.default_file_name_format:
+            file_name = apply_format(self.config.default_file_name_format, self.scene_data, self.file_data)
+        else:
+            file_name = self.file_data["basename"]
 
         return f"{directory_path}/{file_name}"
 
