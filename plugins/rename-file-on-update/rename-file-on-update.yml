@@ -25,6 +25,10 @@ settings:
     displayName: Default file name format
     description: The default file name to use for renamed scene files.
     type: STRING
+  dryRun:
+    displayName: Dry Run
+    description: If enabled, the plugin will not actually rename files, but will log what it would do.
+    type: BOOLEAN
 
 tasks:
   - name: Rename scenes
