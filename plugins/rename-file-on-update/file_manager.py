@@ -90,7 +90,7 @@ def apply_format(format_template: str, stash: StashInterface, scene_data, file_d
 
     formatted_template = clean_optional_from_format(formatted_template)
 
-    return formatted_template.strip()
+    return formatted_template
 
 
 class StashFile:
@@ -120,15 +120,15 @@ class StashFile:
             file_data = {**self.file_data, "index": self.duplicate_index}
             file_name = apply_format(self.config.default_file_name_format, self.stash, self.scene_data, file_data)
 
-            if self.config.remove_extra_spaces_from_file_name:
-                file_name = re.sub(r"\s+", " ", file_name)
-
             if self.duplicate_index:
                 duplicate_suffix = apply_format(self.config.duplicate_file_suffix, self.stash, self.scene_data, file_data)
                 base_name = file_name.rsplit(".", 1)[0]
                 extension = file_name.rsplit(".", 1)[1]
 
                 file_name = f"{base_name}{duplicate_suffix}.{extension}"
+
+            if self.config.remove_extra_spaces_from_file_name:
+                file_name = re.sub(r"\s+", " ", file_name)
         else:
             file_name = self.file_data["basename"]
 
