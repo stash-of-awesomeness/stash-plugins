@@ -30,9 +30,11 @@ SCENE_VARIABLES = {
     "title": key_getter("title"),
     "date": key_getter("date"),
     "director": key_getter("director"),
+    "month": lambda _, scene: scene.get("date", "").split("-")[1] if scene.get("date") else "",
+    "parent_studio_chain": get_parent_studio_chain,
     "studio_code": key_getter("code"),
     "studio_name": lambda _, scene: scene.get("studio", {}).get("name", ""),
-    "parent_studio_chain": get_parent_studio_chain,
+    "year": lambda _, scene: scene.get("date", "").split("-")[0] if scene.get("date") else "",
 }
 
 def find_variables(format_template) -> list[str]:
