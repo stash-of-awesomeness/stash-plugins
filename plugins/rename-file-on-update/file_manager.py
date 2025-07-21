@@ -96,13 +96,16 @@ class StashFile:
 
         return path.absolute()
 
-    def get_new_file_path(self) -> pathlib.Path:
+    def get_new_file_folder(self) -> pathlib.Path:
         if self.config.default_directory_path_format:
             directory_path = apply_format(self.config.default_directory_path_format, self.stash, self.scene_data, self.file_data)
         else:
             path = pathlib.Path(self.file_data["path"])
             directory_path = path.parent.absolute()
 
+        return pathlib.Path(directory_path)
+    
+    def get_new_file_name(self) -> str:
         if self.config.default_file_name_format:
             file_name = apply_format(self.config.default_file_name_format, self.stash, self.scene_data, self.file_data)
 
@@ -111,7 +114,10 @@ class StashFile:
         else:
             file_name = self.file_data["basename"]
 
-        return pathlib.Path(f"{directory_path}/{file_name}")
+        return file_name
+
+    def get_new_file_path(self) -> pathlib.Path:
+        return self.get_new_file_folder() / self.get_new_file_name()
 
     def rename_file(self):
         old_path = self.get_old_file_path()
@@ -121,4 +127,21 @@ class StashFile:
             log.info("File paths are the same, no renaming needed.")
             return
 
+        log.info(f"Checking if a file exists at {new_path}")
+
+        if new_path.exists():
+            log.warning(f"File already exists at {new_path}, skipping renaming.")
+            return
+
         log.info(f"Renaming file from {old_path} to {new_path}")
+        if self.config.dry_run:
+            log.info("Dry run enabled, not actually renaming the file.")
+            return
+        
+        moved_file = self.stash.move_files({
+            "ids": [self.file_data["id"]],
+            "destination_folder": self.get_new_file_folder(),
+            "destination_basename": self.get_new_file_name(),
+        })
+
+        log.info(f"File renamed successfully: {moved_file}")
