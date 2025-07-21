@@ -29,6 +29,10 @@ settings:
     displayName: Dry Run
     description: If enabled, the plugin will not actually rename files, but will log what it would do.
     type: BOOLEAN
+  removeExtraSpacesFromFileName:
+    displayName: Remove extra spaces from file name
+    description: If enabled, the plugin will remove extra spaces from the file name.
+    type: BOOLEAN
 
 tasks:
   - name: Rename scenes

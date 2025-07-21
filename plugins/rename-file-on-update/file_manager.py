@@ -2,6 +2,7 @@ from operator import itemgetter
 from stashapi.stashapp import StashInterface
 from stashapi import log
 import pathlib
+import re
 
 
 def get_parent_studio_chain(stash, scene):
@@ -51,8 +52,15 @@ def find_variables(format_template) -> list[str]:
 
     return variables
 
+
+def clean_optional_from_format(formatted_string: str) -> str:
+    return re.sub(r"\{.*\$\w+\$.*\}", "", formatted_string)
+
+
 def apply_format(format_template, stash, scene_data, file_data):
     variables = find_variables(format_template)
+
+    formatted_template = format_template
 
     for variable in variables:
         if variable in FILE_VARIABLES:
@@ -62,9 +70,9 @@ def apply_format(format_template, stash, scene_data, file_data):
         else:
             value = "<unknown>"
 
-        format_template = format_template.replace(f"${variable}$", str(value))
+        formatted_template = formatted_template.replace(f"${variable}$", str(value))
 
-    return format_template
+    return clean_optional_from_format(formatted_template)
 
 
 class StashFile:
@@ -94,6 +102,11 @@ class StashFile:
         return pathlib.Path(f"{directory_path}/{file_name}")
 
     def rename_file(self):
-        if self.get_old_file_path() == self.get_new_file_path():
+        old_path = self.get_old_file_path()
+        new_path = self.get_new_file_path()
+
+        if old_path == new_path:
             log.info("File paths are the same, no renaming needed.")
             return
+
+        log.info(f"Renaming file from {old_path} to {new_path}")
