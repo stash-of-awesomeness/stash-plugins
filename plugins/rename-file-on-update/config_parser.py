@@ -14,7 +14,12 @@ class Config:
     def __getattr__(self, name):
         config_name = self.__to_camel_case(name)
 
-        return self.config.get(config_name, Config.DEFAULT_CONFIG.get(config_name))
+        stash_config = self.config.get(config_name)
+
+        if stash_config is not None:
+            return stash_config
+
+        return Config.DEFAULT_CONFIG.get(config_name)
 
     @staticmethod
     def __to_camel_case(snake_str):
