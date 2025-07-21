@@ -151,6 +151,10 @@ class StashFile:
             log.warning(f"File already exists at {new_path}, adding duplicate suffix: {self.duplicate_index}")
             new_path = self.get_new_file_path()
 
+            if old_path == new_path:
+                log.info("File paths are the same after adding duplicate suffix, no renaming needed.")
+                return
+
         log.info(f"Renaming file from {old_path} to {new_path}")
         if self.config.dry_run:
             log.info("Dry run enabled, not actually renaming the file.")
