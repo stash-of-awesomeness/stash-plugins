@@ -1,6 +1,7 @@
 from operator import itemgetter
 from stashapi.stashapp import StashInterface
 from stashapi import log
+import pathlib
 
 
 def get_parent_studio_chain(stash, scene):
@@ -40,6 +41,10 @@ SCENE_VARIABLES = {
 def find_variables(format_template) -> list[str]:
     variables = []
 
+    for variable in FILE_VARIABLES.keys():
+        if f"${variable}$" in format_template:
+            variables.append(variable)
+
     for variable in SCENE_VARIABLES.keys():
         if f"${variable}$" in format_template:
             variables.append(variable)
@@ -70,20 +75,23 @@ class StashFile:
         self.file_data = file_data
 
     def get_old_file_path(self):
-        return f'{self.file_data["path"]}{self.file_data["basename"]}'
+        path = pathlib.Path(self.file_data["path"])
+
+        return path.absolute()
 
     def get_new_file_path(self):
         if self.config.default_directory_path_format:
             directory_path = apply_format(self.config.default_directory_path_format, self.stash, self.scene_data, self.file_data)
         else:
-            directory_path = self.file_data["path"]
+            path = pathlib.Path(self.file_data["path"])
+            directory_path = path.parent.absolute()
 
         if self.config.default_file_name_format:
             file_name = apply_format(self.config.default_file_name_format, self.stash, self.scene_data, self.file_data)
         else:
             file_name = self.file_data["basename"]
 
-        return f"{directory_path}/{file_name}"
+        return pathlib.Path(f"{directory_path}/{file_name}")
 
     def rename_file(self):
         if self.get_old_file_path() == self.get_new_file_path():
