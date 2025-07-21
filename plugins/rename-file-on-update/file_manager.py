@@ -128,7 +128,7 @@ class StashFile:
                 base_name = file_name.rsplit(".", 1)[0]
                 extension = file_name.rsplit(".", 1)[1]
 
-                file_name = f"{base_name}{duplicate_suffix}{extension}"
+                file_name = f"{base_name}{duplicate_suffix}.{extension}"
         else:
             file_name = self.file_data["basename"]
 
