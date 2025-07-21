@@ -72,7 +72,9 @@ def apply_format(format_template, stash, scene_data, file_data):
 
         formatted_template = formatted_template.replace(f"${variable}$", str(value))
 
-    return clean_optional_from_format(formatted_template)
+    formatted_template = clean_optional_from_format(formatted_template)
+
+    return formatted_template.strip()
 
 
 class StashFile:
@@ -96,6 +98,9 @@ class StashFile:
 
         if self.config.default_file_name_format:
             file_name = apply_format(self.config.default_file_name_format, self.stash, self.scene_data, self.file_data)
+
+            if self.config.remove_extra_spaces_from_file_name:
+                file_name = re.sub(r"\s+", " ", file_name)
         else:
             file_name = self.file_data["basename"]
 
