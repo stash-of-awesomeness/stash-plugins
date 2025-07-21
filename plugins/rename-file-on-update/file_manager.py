@@ -44,14 +44,14 @@ def find_variables(format_template) -> list[str]:
 
     return variables
 
-def apply_format(format_template, scene_data, file_data):
+def apply_format(format_template, stash, scene_data, file_data):
     variables = find_variables(format_template)
 
     for variable in variables:
         if variable in FILE_VARIABLES:
-            value = FILE_VARIABLES[variable](file_data)
+            value = FILE_VARIABLES[variable](stash, file_data)
         elif variable in SCENE_VARIABLES:
-            value = SCENE_VARIABLES[variable](scene_data)
+            value = SCENE_VARIABLES[variable](stash, scene_data)
         else:
             value = "<unknown>"
 
@@ -72,12 +72,12 @@ class StashFile:
 
     def get_new_file_path(self):
         if self.config.default_directory_path_format:
-            directory_path = apply_format(self.config.default_directory_path_format, self.scene_data, self.file_data)
+            directory_path = apply_format(self.config.default_directory_path_format, self.stash, self.scene_data, self.file_data)
         else:
             directory_path = self.file_data["path"]
 
         if self.config.default_file_name_format:
-            file_name = apply_format(self.config.default_file_name_format, self.scene_data, self.file_data)
+            file_name = apply_format(self.config.default_file_name_format, self.stash, self.scene_data, self.file_data)
         else:
             file_name = self.file_data["basename"]
 
