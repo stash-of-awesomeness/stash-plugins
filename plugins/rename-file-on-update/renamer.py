@@ -39,6 +39,8 @@ def rename_scene(stash: StashInterface, config: Config, args):
     scene_id = args["hookContext"]["id"]
     scene = stash.find_scene(scene_id, fragment=SCENE_FRAGMENT)
 
+    log.info(f"Found scene: {scene}")
+
     if not config.rename_unorganized and not scene["organized"]:
         log.info("Scene is not marked as organized, ignoring scene.")
         return

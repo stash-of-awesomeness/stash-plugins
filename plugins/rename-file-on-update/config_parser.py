@@ -14,6 +14,7 @@ class Config:
 
         return self.config.get(config_name, Config.DEFAULT_CONFIG.get(config_name))
 
+    @staticmethod
     def __to_camel_case(snake_str):
         pascal_case = "".join(x.capitalize() for x in snake_str.lower().split("_"))
         return pascal_case[0].lower() + pascal_case[1:]
