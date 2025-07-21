@@ -1,0 +1,17 @@
+name: Rename File on Update
+description: Renames files when they are updated in Stash.
+version: 0.1.0
+exec:
+  - python
+  - "{pluginDir}/rename_file_on_update.py"
+interface: raw
+hooks:
+  - name: hook_rename
+    description: Rename a scene's files when it is updated.
+    triggeredBy:
+      - Scene.Update.Post
+tasks:
+  - name: "Rename scenes"
+    description: Rename all of your scene's files based on your configuration.
+    defaultArgs:
+      action: rename-all
