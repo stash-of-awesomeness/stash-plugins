@@ -4,6 +4,8 @@ class Config:
         "defaultFileNameFormat": "",
         "dryRun": False,
         "renameUnorganized": False,
+        "removeExtraSpacesFromFileName": False,
+        "duplicateFileSuffix": " ($index$)",
     }
 
     def __init__(self, config):

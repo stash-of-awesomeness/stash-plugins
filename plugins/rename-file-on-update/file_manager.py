@@ -24,13 +24,14 @@ def get_parent_studio_chain(stash, scene):
     return "/".join(reversed(parent_chain))
 
 def key_getter(key):
-    return lambda _, scene: scene.get(key, "")
+    return lambda _, data: data.get(key, "")
 
 FILE_VARIABLES = {
     "audio_codec": key_getter("audio_codec"),
     "ext": lambda _, file: file.get("basename", "").split(".")[-1],
     "format": key_getter("format"),
     "height": key_getter("height"),
+    "index": key_getter("index"),
     "video_codec": key_getter("video_codec"),
     "width": key_getter("width"),
 }
@@ -98,6 +99,7 @@ class StashFile:
         self.config = config
         self.scene_data = scene_data
         self.file_data = file_data
+        self.duplicate_index = 0
 
     def get_old_file_path(self) -> pathlib.Path:
         path = pathlib.Path(self.file_data["path"])
@@ -115,10 +117,18 @@ class StashFile:
     
     def get_new_file_name(self) -> str:
         if self.config.default_file_name_format:
-            file_name = apply_format(self.config.default_file_name_format, self.stash, self.scene_data, self.file_data)
+            file_data = {**self.file_data, "index": self.duplicate_index}
+            file_name = apply_format(self.config.default_file_name_format, self.stash, self.scene_data, file_data)
 
             if self.config.remove_extra_spaces_from_file_name:
                 file_name = re.sub(r"\s+", " ", file_name)
+
+            if self.duplicate_index:
+                duplicate_suffix = apply_format(self.config.duplicate_suffix, self.stash, self.scene_data, file_data)
+                base_name = file_name.rsplit(".", 1)[0]
+                extension = file_name.rsplit(".", 1)[1]
+
+                file_name = f"{base_name}{duplicate_suffix}{extension}"
         else:
             file_name = self.file_data["basename"]
 
@@ -136,16 +146,16 @@ class StashFile:
             return
 
         log.debug(f"Checking if a file exists at {new_path}")
-
-        if new_path.exists():
-            log.warning(f"File already exists at {new_path}, skipping renaming.")
-            return
+        while new_path.exists():
+            self.duplicate_index += 1
+            log.warning(f"File already exists at {new_path}, adding duplicate suffix: {self.duplicate_index}")
+            new_path = self.get_new_file_path()
 
         log.info(f"Renaming file from {old_path} to {new_path}")
         if self.config.dry_run:
             log.info("Dry run enabled, not actually renaming the file.")
             return
-        
+
         moved_file = self.stash.call_GQL(
             MOVE_FILE_MUTATION,
             {"input": {
