@@ -11,7 +11,7 @@ ARGS = STASH_DATA["args"]
 ACTION = ARGS.get("action")
 
 stash = StashInterface(STASH_DATA["server_connection"])
-stash_config = stash.get_config()
+stash_config = stash.get_configuration()
 
 config = Config(stash_config["plugins"].get("rename-file-on-update", {}))
 
