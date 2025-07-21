@@ -54,17 +54,16 @@ def find_variables(format_template) -> list[str]:
 
 
 def clean_optional_from_format(formatted_string: str) -> str:
-    variables = find_variables(formatted_string)
+    # Erase entire optional section if there is an unused variable
+    formatted_string = re.sub(r"\{.*\$\w+\$.*\}", "", formatted_string)
 
-    for variable in variables:
-        formatted_string = re.sub(rf"\{{.*\${variable}\$.*\}}", "", formatted_string)
-
+    # Remove any remaining curly braces
     formatted_string = formatted_string.replace(r"{", "").replace(r"}", "")
 
     return formatted_string
 
 
-def apply_format(format_template, stash, scene_data, file_data):
+def apply_format(format_template: str, stash: StashInterface, scene_data, file_data)-> str:
     variables = find_variables(format_template)
 
     formatted_template = format_template
@@ -74,8 +73,9 @@ def apply_format(format_template, stash, scene_data, file_data):
             value = FILE_VARIABLES[variable](stash, file_data)
         elif variable in SCENE_VARIABLES:
             value = SCENE_VARIABLES[variable](stash, scene_data)
-        else:
-            value = "<unknown>"
+
+        if not value:
+            continue
 
         formatted_template = formatted_template.replace(f"${variable}$", str(value))
 
@@ -91,12 +91,12 @@ class StashFile:
         self.scene_data = scene_data
         self.file_data = file_data
 
-    def get_old_file_path(self):
+    def get_old_file_path(self) -> pathlib.Path:
         path = pathlib.Path(self.file_data["path"])
 
         return path.absolute()
 
-    def get_new_file_path(self):
+    def get_new_file_path(self) -> pathlib.Path:
         if self.config.default_directory_path_format:
             directory_path = apply_format(self.config.default_directory_path_format, self.stash, self.scene_data, self.file_data)
         else:
