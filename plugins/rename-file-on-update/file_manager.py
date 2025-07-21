@@ -1,20 +1,38 @@
 from operator import itemgetter
+from stashapi.stashapp import StashInterface
 from stashapi import log
 
+
+def get_parent_studio_chain(stash, scene):
+    current_studio = scene.get("studio", {})
+    parent_chain = [current_studio.get("name", "")]
+
+    while current_studio.get("parent_studio"):
+        current_studio = stash.find_studio(current_studio.get("parent_studio"))
+
+        parent_chain.append(current_studio.get("name"))
+
+    return "/".join(parent_chain)
+
+def key_getter(key):
+    return lambda _, scene: scene.get(key, "")
+
 FILE_VARIABLES = {
-    "audio_codec": itemgetter("audio_codec"),
-    "format": itemgetter("format"),
-    "height": itemgetter("height"),
-    "video_codec": itemgetter("video_codec"),
-    "width": itemgetter("width"),
+    "audio_codec": key_getter("audio_codec"),
+    "format": key_getter("format"),
+    "height": key_getter("height"),
+    "video_codec": key_getter("video_codec"),
+    "width": key_getter("width"),
 }
 
 SCENE_VARIABLES = {
-    "scene_id": itemgetter("id"),
-    "title": itemgetter("title"),
-    "date": itemgetter("date"),
-    "director": itemgetter("director"),
-    "studio_code": itemgetter("code"),
+    "scene_id": key_getter("id"),
+    "title": key_getter("title"),
+    "date": key_getter("date"),
+    "director": key_getter("director"),
+    "studio_code": key_getter("code"),
+    "studio_name": lambda _, scene: scene.get("studio", {}).get("name", ""),
+    "parent_studio_chain": get_parent_studio_chain,
 }
 
 def find_variables(format_template) -> list[str]:
@@ -41,8 +59,10 @@ def apply_format(format_template, scene_data, file_data):
 
     return format_template
 
+
 class StashFile:
-    def __init__(self, config, scene_data, file_data):
+    def __init__(self, stash: StashInterface, config, scene_data, file_data):
+        self.stash = stash
         self.config = config
         self.scene_data = scene_data
         self.file_data = file_data
