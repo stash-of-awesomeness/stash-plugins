@@ -141,6 +141,10 @@ class StashFile:
         old_path = self.get_old_file_path()
         new_path = self.get_new_file_path()
 
+        if not old_path.exists():
+            log.warning(f"File for scene does not exist on disk: {old_path}")
+            return
+
         if old_path == new_path:
             log.info("File paths are the same, no renaming needed.")
             return
