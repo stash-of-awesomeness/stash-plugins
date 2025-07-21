@@ -8,7 +8,7 @@ def rename_scene(stash: StashInterface, config: Config, args):
     log.info(f"Checking scene with args: {args}")
 
     scene_id = args["hookContext"]["id"]
-    scene = stash.get_scene(scene_id)
+    scene = stash.find_scene(scene_id)
 
     if not config.rename_unorganized and not scene["organized"]:
         log.info("Scene is not marked as organized, ignoring scene.")
