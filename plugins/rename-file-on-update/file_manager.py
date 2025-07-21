@@ -5,6 +5,13 @@ import pathlib
 import re
 
 
+MOVE_FILE_MUTATION = """
+mutation MoveFiles($input: MoveFilesInput!) {
+    moveFiles(input: $input)
+}
+"""
+
+
 def get_parent_studio_chain(stash, scene):
     current_studio = scene.get("studio", {})
     parent_chain = [current_studio.get("name", "")]
@@ -138,10 +145,14 @@ class StashFile:
             log.info("Dry run enabled, not actually renaming the file.")
             return
         
-        moved_file = self.stash.move_files({
-            "ids": [self.file_data["id"]],
-            "destination_folder": self.get_new_file_folder(),
-            "destination_basename": self.get_new_file_name(),
-        })
+        moved_file = self.stash.call_GQL(
+            MOVE_FILE_MUTATION,
+            {"input": {
+                    "ids": [self.file_data["id"]],
+                    "destination_folder": self.get_new_file_folder(),
+                    "destination_basename": self.get_new_file_name(),
+                }
+            }
+        )
 
         log.info(f"File renamed successfully: {moved_file}")
