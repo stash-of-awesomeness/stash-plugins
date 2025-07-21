@@ -124,7 +124,7 @@ class StashFile:
                 file_name = re.sub(r"\s+", " ", file_name)
 
             if self.duplicate_index:
-                duplicate_suffix = apply_format(self.config.duplicate_suffix, self.stash, self.scene_data, file_data)
+                duplicate_suffix = apply_format(self.config.duplicate_file_suffix, self.stash, self.scene_data, file_data)
                 base_name = file_name.rsplit(".", 1)[0]
                 extension = file_name.rsplit(".", 1)[1]
 
