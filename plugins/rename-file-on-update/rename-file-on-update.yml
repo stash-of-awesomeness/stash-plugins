@@ -31,7 +31,8 @@ settings:
     type: BOOLEAN
   duplicateFileSuffix:
     displayName: Duplicate file suffix
-    description: The suffix to append to duplicate files (default: " ($index$)")
+    description: |
+      The suffix to append to duplicate files (default: ' ($index$)')
     type: STRING
   removeExtraSpacesFromFileName:
     displayName: Remove extra spaces from file name
