@@ -5,13 +5,29 @@ exec:
   - python
   - "{pluginDir}/rename_file_on_update.py"
 interface: raw
+
 hooks:
-  - name: hook_rename
+  - name: Rename scene files on update
     description: Rename a scene's files when it is updated.
     triggeredBy:
       - Scene.Update.Post
+
+settings:
+  renameUnorganized:
+    displayName: Rename unorganized scenes
+    description: Rename files for scenes that are not marked as organized.
+    type: BOOLEAN
+  defaultDirectoryPathFormat:
+    displayName: Default directory path format
+    description: The default directory path to put renamed scene files in.
+    type: STRING
+  defaultFileNameFormat:
+    displayName: Default file name format
+    description: The default file name to use for renamed scene files.
+    type: STRING
+
 tasks:
-  - name: "Rename scenes"
+  - name: Rename scenes
     description: Rename all of your scene's files based on your configuration.
     defaultArgs:
       action: rename-all
