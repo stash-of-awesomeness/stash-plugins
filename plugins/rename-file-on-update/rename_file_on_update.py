@@ -2,8 +2,8 @@ from stashapi.stashapp import StashInterface
 import json
 import sys
 
-from .config_parser import Config
-from .renamer import rename_scene, rename_all_scenes
+from config_parser import Config
+from renamer import rename_scene, rename_all_scenes
 
 STASH_DATA = json.loads(sys.stdin.read())
 
