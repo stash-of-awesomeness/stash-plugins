@@ -109,28 +109,32 @@ class StashFile:
     def get_new_file_folder(self) -> pathlib.Path:
         if self.config.default_directory_path_format:
             directory_path = apply_format(self.config.default_directory_path_format, self.stash, self.scene_data, self.file_data)
+            directory_path = pathlib.Path(directory_path).absolute()
         else:
             path = pathlib.Path(self.file_data["path"])
             directory_path = path.parent.absolute()
 
-        return pathlib.Path(directory_path)
+        return directory_path
     
     def get_new_file_name(self) -> str:
-        if self.config.default_file_name_format:
-            file_data = {**self.file_data, "index": self.duplicate_index}
-            file_name = apply_format(self.config.default_file_name_format, self.stash, self.scene_data, file_data)
+        if not self.config.default_file_name_format:
+            return self.file_data["basename"]
 
-            if self.duplicate_index:
-                duplicate_suffix = apply_format(self.config.duplicate_file_suffix, self.stash, self.scene_data, file_data)
-                base_name = file_name.rsplit(".", 1)[0]
-                extension = file_name.rsplit(".", 1)[1]
+        file_data = {**self.file_data, "index": self.duplicate_index}
+        file_name = apply_format(self.config.default_file_name_format, self.stash, self.scene_data, file_data)
 
-                file_name = f"{base_name}{duplicate_suffix}.{extension}"
+        if self.duplicate_index:
+            duplicate_suffix = apply_format(self.config.duplicate_file_suffix, self.stash, self.scene_data, file_data)
+            base_name = file_name.rsplit(".", 1)[0]
+            extension = file_name.rsplit(".", 1)[1]
 
-            if self.config.remove_extra_spaces_from_file_name:
-                file_name = re.sub(r"\s+", " ", file_name)
-        else:
-            file_name = self.file_data["basename"]
+            file_name = f"{base_name}{duplicate_suffix}.{extension}"
+
+        if not self.config.allow_unsafe_characters:
+            file_name = re.sub(r"[<>:\"/\\|?*]", "", file_name)
+
+        if self.config.remove_extra_spaces_from_file_name:
+            file_name = re.sub(r"\s+", " ", file_name)
 
         return file_name
 

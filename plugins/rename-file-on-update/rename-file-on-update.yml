@@ -38,6 +38,10 @@ settings:
     displayName: Remove extra spaces from file name
     description: If enabled, the plugin will remove extra spaces from the file name.
     type: BOOLEAN
+  allowUnsafeCharacters:
+    displayName: Allow unsafe characters
+    description: If enabled, the plugin will allow unsafe characters in file names and directory paths.
+    type: BOOLEAN
 
 tasks:
   - name: Rename scenes
