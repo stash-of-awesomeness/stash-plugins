@@ -217,4 +217,4 @@ class StashFile:
         )
 
         log.info(f"File renamed successfully: {moved_file}")
-        self.rename_related_files(oldpath, new_path, dry_run=False)
+        self.rename_related_files(old_path, new_path, dry_run=False)
