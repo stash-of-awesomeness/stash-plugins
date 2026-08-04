@@ -1,8 +1,11 @@
-from operator import itemgetter
+import typing
+
+from config_parser import Config
 from stashapi.stashapp import StashInterface
 from stashapi import log
 import pathlib
 import re
+import api
 
 
 MOVE_FILE_MUTATION = """
@@ -11,24 +14,28 @@ mutation MoveFiles($input: MoveFilesInput!) {
 }
 """
 
+class IndexedSceneFileDict(api.SceneFileDict):
+    index: int
 
-def get_parent_studio_chain(stash, scene):
+
+def get_parent_studio_chain(stash: StashInterface, scene: api.SceneDict):
     current_studio = scene.get("studio", {})
     parent_chain = [current_studio.get("name", "")]
 
     while current_studio.get("parent_studio"):
         current_studio = stash.find_studio(current_studio.get("parent_studio"))
-
-        parent_chain.append(current_studio.get("name"))
+        if name := current_studio.get("name"):
+            parent_chain.append(name)
 
     return "/".join(reversed(parent_chain))
 
-def key_getter(key):
+def key_getter(key: str) -> typing.Callable[[typing.Any, dict], typing.Any]:
     return lambda _, data: data.get(key, "")
 
 FILE_VARIABLES = {
     "audio_codec": key_getter("audio_codec"),
     "ext": lambda _, file: file.get("basename", "").split(".")[-1],
+    # Dead?
     "format": key_getter("format"),
     "height": key_getter("height"),
     "index": key_getter("index"),
@@ -40,6 +47,7 @@ SCENE_VARIABLES = {
     "scene_id": key_getter("id"),
     "title": key_getter("title"),
     "date": key_getter("date"),
+    # Dead?
     "director": key_getter("director"),
     "month": lambda _, scene: scene.get("date", "").split("-")[1] if scene.get("date") else "",
     "parent_studio_chain": get_parent_studio_chain,
@@ -48,7 +56,7 @@ SCENE_VARIABLES = {
     "year": lambda _, scene: scene.get("date", "").split("-")[0] if scene.get("date") else "",
 }
 
-def find_variables(format_template) -> list[str]:
+def find_variables(format_template: str) -> list[str]:
     variables = []
 
     for variable in FILE_VARIABLES.keys():
@@ -72,7 +80,12 @@ def clean_optional_from_format(formatted_string: str) -> str:
     return formatted_string
 
 
-def apply_format(format_template: str, stash: StashInterface, scene_data, file_data)-> str:
+def apply_format(
+    format_template: str,
+    stash: StashInterface,
+    scene_data: api.SceneDict,
+    file_data: api.SceneFileDict | IndexedSceneFileDict
+) -> str:
     variables = find_variables(format_template)
 
     formatted_template = format_template
@@ -94,7 +107,7 @@ def apply_format(format_template: str, stash: StashInterface, scene_data, file_d
 
 
 class StashFile:
-    def __init__(self, stash: StashInterface, config, scene_data, file_data):
+    def __init__(self, stash: StashInterface, config: Config, scene_data: api.SceneDict, file_data: api.SceneFileDict):
         self.stash = stash
         self.config = config
         self.scene_data = scene_data
@@ -120,10 +133,12 @@ class StashFile:
         if not self.config.default_file_name_format:
             return self.file_data["basename"]
 
-        file_data = {**self.file_data, "index": self.duplicate_index}
+        file_data: IndexedSceneFileDict = {**self.file_data, "index": self.duplicate_index}
         file_name = apply_format(self.config.default_file_name_format, self.stash, self.scene_data, file_data)
 
         if self.duplicate_index:
+            if self.config.duplicate_file_suffix is None:
+                raise RuntimeError("DUPLICATE_FILE_SUFFIX not set!")
             duplicate_suffix = apply_format(self.config.duplicate_file_suffix, self.stash, self.scene_data, file_data)
             base_name = file_name.rsplit(".", 1)[0]
             extension = file_name.rsplit(".", 1)[1]
@@ -141,7 +156,7 @@ class StashFile:
     def get_new_file_path(self) -> pathlib.Path:
         return self.get_new_file_folder() / self.get_new_file_name()
 
-    def rename_related_files(self, old_path: pathlib.Path, new_path: pathlib.Path, dry_run: bool):
+    def rename_related_files(self, old_path: pathlib.Path, new_path: pathlib.Path, dry_run: bool) -> None:
         if not self.config.rename_related_files:
             return
 
@@ -178,7 +193,7 @@ class StashFile:
             except OSError as error:
                 log.error(f"Failed to rename related file from {related_file} to {target_path}: {error}")
 
-    def rename_file(self):
+    def rename_file(self) -> None:
         old_path = self.get_old_file_path()
         new_path = self.get_new_file_path()
 
@@ -217,4 +232,4 @@ class StashFile:
         )
 
         log.info(f"File renamed successfully: {moved_file}")
-        self.rename_related_files(oldpath, new_path, dry_run=False)
+        self.rename_related_files(old_path, new_path, dry_run=False)
