@@ -2,42 +2,13 @@ from stashapi.stashapp import StashInterface
 from stashapi import log
 from config_parser import Config
 from file_manager import StashFile
-
-SCENE_FRAGMENT = """
-id
-title
-code
-date
-organized
-
-studio {
-    id
-    name
-    parent_studio {
-        id
-        name
-    }
-}
-
-files {
-    id
-    path
-    basename
-
-    format
-    width
-    height
-    duration
-    video_codec
-    audio_codec
-}
-"""
+import api
 
 def rename_scene(stash: StashInterface, config: Config, args):
     log.debug(f"Checking scene with args: {args}")
 
     scene_id = args["hookContext"]["id"]
-    scene = stash.find_scene(scene_id, fragment=SCENE_FRAGMENT)
+    scene = api.get_scene(stash, scene_id)
 
     log.debug(f"Found scene: {scene}")
 
