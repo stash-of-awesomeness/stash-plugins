@@ -56,6 +56,7 @@ def test_default_override():
     conf = Config({"renameRelatedFiles": False})
     assert conf.RENAME_RELATED_FILES is False
 
+
 def test_snake_case_accessable():
     """
     duplicate_file_suffix attribute accessable.
