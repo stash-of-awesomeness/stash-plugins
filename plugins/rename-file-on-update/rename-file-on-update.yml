@@ -1,6 +1,6 @@
 name: Rename File on Update
-description: Renames files when they are updated in Stash.
-version: 0.1.0
+description: Renames files when they are updated in Stash using Whisparr v3 naming tokens.
+version: 0.2.0
 exec:
   - python
   - "{pluginDir}/rename_file_on_update.py"
@@ -23,11 +23,15 @@ settings:
     type: BOOLEAN
   defaultDirectoryPathFormat:
     displayName: Default directory path format
-    description: The default directory path to put renamed scene files in.
+    description: |
+      Folder path using Whisparr v3 brace tokens (e.g. `{Studio CleanTitle}/{Release Year}`).
+      See TOKENS.md in the plugin folder. Replaces the legacy `$variable$` syntax from v0.1.x.
     type: STRING
   defaultFileNameFormat:
     displayName: Default file name format
-    description: The default file name to use for renamed scene files.
+    description: |
+      File name (without extension) using Whisparr v3 tokens (e.g. `{Studio CleanTitle} - {Release Date} - {Scene CleanTitle} [{Quality Title}]`).
+      The file extension is appended automatically. See TOKENS.md.
     type: STRING
   dryRun:
     displayName: Dry Run
@@ -36,7 +40,7 @@ settings:
   duplicateFileSuffix:
     displayName: Duplicate file suffix
     description: |
-      The suffix to append to duplicate files (default: ' ($index$)')
+      Suffix appended when a target file already exists. Use `{index}` for the duplicate counter (default ` ({index})`).
     type: STRING
   removeExtraSpacesFromFileName:
     displayName: Remove extra spaces from file name

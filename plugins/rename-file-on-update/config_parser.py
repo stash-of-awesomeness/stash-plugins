@@ -6,7 +6,7 @@ class Config:
         "renameUnorganized": False,
         "renameRelatedFiles": True,
         "removeExtraSpacesFromFileName": False,
-        "duplicateFileSuffix": " ($index$)",
+        "duplicateFileSuffix": " ({index})",
     }
 
     def __init__(self, config):

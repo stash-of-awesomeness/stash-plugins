@@ -9,6 +9,25 @@ title
 code
 date
 organized
+director
+
+performers {
+    id
+    name
+    gender
+    disambiguation
+}
+
+stash_ids {
+    endpoint
+    stash_id
+}
+
+groups {
+    group {
+        name
+    }
+}
 
 studio {
     id
